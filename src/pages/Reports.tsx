@@ -136,7 +136,7 @@ const handleGoToPage = (page: number) => {
     } finally {
         setLoadingDaily(false);
     }
-}, 
+}
                                        
   const formatForBackend = (localDatetime: string) => {
     if (!localDatetime) return '';
