@@ -136,7 +136,8 @@ const handleGoToPage = (page: number) => {
     } finally {
         setLoadingDaily(false);
     }
-}, [setDailySummary, setLoadingDaily, setFinanceAccounts]);
+}, 
+                                       
   const formatForBackend = (localDatetime: string) => {
     if (!localDatetime) return '';
     return localDatetime.length === 16 ? `${localDatetime}:00` : localDatetime;
