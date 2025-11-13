@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { FinanceProvider } from './contexts/FinanceContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -9,7 +9,7 @@ import Banks from './pages/Banks';
 import Payables from './pages/Payables';
 import Receivables from './pages/Receivables';
 import Reports from './pages/Reports';
-import { Home, Users as UsersIcon, Building2, FileText, TrendingUp, BarChart3, LogOut, User } from 'lucide-react';
+import { Users as UsersIcon, Building2, FileText, TrendingUp, BarChart3, LogOut, User } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 
 const AppContent: React.FC = () => {
