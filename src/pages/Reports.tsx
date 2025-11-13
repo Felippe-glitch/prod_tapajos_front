@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Download, Calendar, FileText } from 'lucide-react';
+import { _Download, Calendar, FileText } from 'lucide-react';
 import { clientSupplierService, bankService, movimentacaoService, bankTransactionService, userService } from '../services';
 import { useFinance } from '../contexts/FinanceContext';
 import { ClientSupplier, Bank, BankTransaction, User } from '../types';
@@ -16,17 +16,17 @@ const Reports: React.FC = () => {
   const [periodEnd, setPeriodEnd] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const [clientSuppliers, setClientSuppliers] = useState<ClientSupplier[]>([]);
-  const [banks, setBanks] = useState<Bank[]>([]);
+  const [_clientSuppliers, setClientSuppliers] = useState<ClientSupplier[]>([]);
+  const [_banks, setBanks] = useState<Bank[]>([]);
   const [transactions, setTransactions] = useState<BankTransaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<BankTransaction[]>([]);
-  const [txSearchTerm, setTxSearchTerm] = useState('');
-  const [txFilterBank, setTxFilterBank] = useState('');
-  const [txFilterType, setTxFilterType] = useState<'all' | 'credit' | 'debit'>('all');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [_filteredTransactions, setFilteredTransactions] = useState<BankTransaction[]>([]);
+  const [_txSearchTerm, setTxSearchTerm] = useState('');
+  const [_txFilterBank, setTxFilterBank] = useState('');
+  const [_txFilterType, setTxFilterType] = useState<'all' | 'credit' | 'debit'>('all');
+  const [_currentUser, setCurrentUser] = useState<User | null>(null);
   const [dailySummary, setDailySummary] = useState<any[]>([]);
   const [loadingDaily, setLoadingDaily] = useState(false);
-  const { banks: financeBanks } = useFinance();
+  const { banks: _financeBanks } = useFinance();
   const [financeAccounts, setFinanceAccounts] = useState<Bank[]>([]);
   const pageSize = 10;
 
@@ -214,7 +214,7 @@ const handleGoToPage = (page: number) => {
     try {
       const resposta = await fetch("https://prodbackend-production.up.railway.app/movimentacao?page=0&pageSize=10");
 
-      const dados = await resposta.json();
+      const _dados = await resposta.json();
     } catch (erro) {
       console.error("Ocorreu um erro:", erro);
     }
