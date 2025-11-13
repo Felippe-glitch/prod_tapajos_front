@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Download, Calendar, FileText } from 'lucide-react';
 import { clientSupplierService, bankService, movimentacaoService, bankTransactionService, userService } from '../services';
 import { useFinance } from '../contexts/FinanceContext';
@@ -71,34 +71,34 @@ const Reports: React.FC = () => {
   });
 
   const [currentMovPage, setCurrentMovPage] = useState(0);
-  const loadExtratoDiario = async () => {
+  const loadExtratoDiario = useCallback(async () => {
     try {
-      const page = await movimentacaoService.getMovimentacoes(currentMovPage, 10);
-      setMovimentacaoData(page || {
-        content: [],
-        totalPages: 0,
-        totalElements: 0,
-        number: 0,
-        size: 10
-      });
-      setExtratoDiario(page?.content || []);
-      await loadDailySummary();
+        const page = await movimentacaoService.getMovimentacoes(currentMovPage, 10);
+        setMovimentacaoData(page || {
+            content: [],
+            totalPages: 0,
+            totalElements: 0,
+            number: 0,
+            size: 10
+        });
+        setExtratoDiario(page?.content || []);
+        await loadDailySummary(); // Chama a outra função memorizada
     } catch (err) {
-      console.error('Erro extrato diário', err);
-      setExtratoDiario([]);
-      setMovimentacaoData({
-        content: [],
-        totalPages: 0,
-        totalElements: 0,
-        number: 0,
-        size: 10
-      });
+        console.error('Erro extrato diário', err);
+        setExtratoDiario([]);
+        setMovimentacaoData({
+            content: [],
+            totalPages: 0,
+            totalElements: 0,
+            number: 0,
+            size: 10
+        });
     }
-  };
-  
+}, [currentMovPage, setMovimentacaoData, setExtratoDiario, loadDailySummary]);
+
   useEffect(() => {
   loadExtratoDiario();
-}, [currentMovPage])
+}, [loadExtratoDiario]);
 
 const handlePreviousPage = () => {
   if (currentMovPage > 0) {
@@ -119,39 +119,24 @@ const handleGoToPage = (page: number) => {
 };
 
 
-  const loadDailySummary = async () => {
+  const loadDailySummary = useCallback(async () => {
     try {
-      setLoadingDaily(true);
-      const res = await movimentacaoService.getExtratoDiario();
-      setDailySummary(res || []);
-      try {
-        const PAGE_SIZE = 100;
-        const first = await api.get('/conta', { params: { page: 0, size: PAGE_SIZE } });
-        let all = first.data.content || [];
-        const totalPages = Number(first.data.totalPages ?? 1);
-        if (totalPages > 1) {
-          const promises = [];
-          for (let p = 1; p < totalPages; p++) promises.push(api.get('/conta', { params: { page: p, size: PAGE_SIZE } }));
-          const pages = await Promise.all(promises);
-          pages.forEach(r => { all = all.concat(r.data.content || []); });
+        setLoadingDaily(true);
+        const res = await movimentacaoService.getExtratoDiario();
+        setDailySummary(res || []);
+        try {
+            const PAGE_SIZE = 100;
+            // ... (resto da sua função)
+        } catch (err) {
+            console.error('Erro ao recarregar contas (/conta):', err);
         }
-        const mapped = (all || []).map((c: any) => ({
-          id: String(c.idConta),
-          name: `${c.fkBanco?.nomeBanco ?? 'Banco'} • Ag ${c.agencia} Cc ${c.conta}-${c.dvConta}`,
-          balance: Number(c.saldo ?? 0)
-        }));
-        setFinanceAccounts(mapped);
-      } catch (err) {
-        console.error('Erro ao recarregar contas (/conta):', err);
-      }
     } catch (err) {
-      console.error('Erro ao buscar extrato do dia', err);
-      setDailySummary([]);
+        console.error('Erro ao buscar extrato do dia', err);
+        setDailySummary([]);
     } finally {
-      setLoadingDaily(false);
+        setLoadingDaily(false);
     }
-  };
-
+}, [setDailySummary, setLoadingDaily, setFinanceAccounts]);
   const formatForBackend = (localDatetime: string) => {
     if (!localDatetime) return '';
     return localDatetime.length === 16 ? `${localDatetime}:00` : localDatetime;
@@ -180,7 +165,7 @@ const handleGoToPage = (page: number) => {
     } catch {
       return String(input);
     }
-  };
+  }; [setLoadingDaily, setDailySummary, setFinanceAccounts]);
 
   const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
