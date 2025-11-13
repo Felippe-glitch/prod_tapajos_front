@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { _Download, Calendar, FileText } from 'lucide-react';
+import { Calendar, FileText } from 'lucide-react';
 import { clientSupplierService, bankService, movimentacaoService, bankTransactionService, userService } from '../services';
 import { useFinance } from '../contexts/FinanceContext';
 import { ClientSupplier, Bank, BankTransaction, User } from '../types';
