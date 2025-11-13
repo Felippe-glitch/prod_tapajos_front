@@ -126,7 +126,22 @@ const handleGoToPage = (page: number) => {
         setDailySummary(res || []);
         try {
             const PAGE_SIZE = 100;
-            // ... (resto da sua função)
+            // (Seu código para buscar contas)
+            const first = await api.get('/conta', { params: { page: 0, size: PAGE_SIZE } });
+            let all = first.data.content || [];
+            const totalPages = Number(first.data.totalPages ?? 1);
+            if (totalPages > 1) {
+                const promises = [];
+                for (let p = 1; p < totalPages; p++) promises.push(api.get('/conta', { params: { page: p, size: PAGE_SIZE } }));
+                const pages = await Promise.all(promises);
+                pages.forEach(r => { all = all.concat(r.data.content || []); });
+            }
+            const mapped = (all || []).map((c: any) => ({
+                id: String(c.idConta),
+                name: `${c.fkBanco?.nomeBanco ?? 'Banco'} • Ag ${c.agencia} Cc ${c.conta}-${c.dvConta}`,
+                balance: Number(c.saldo ?? 0)
+            }));
+            setFinanceAccounts(mapped);
         } catch (err) {
             console.error('Erro ao recarregar contas (/conta):', err);
         }
@@ -136,7 +151,7 @@ const handleGoToPage = (page: number) => {
     } finally {
         setLoadingDaily(false);
     }
-} [setLoadingDaily, setDailySummary]);
+}, [setLoadingDaily, setDailySummary, setFinanceAccounts]); 
                                        
   const formatForBackend = (localDatetime: string) => {
     if (!localDatetime) return '';
