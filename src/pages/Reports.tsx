@@ -70,6 +70,40 @@ const Reports: React.FC = () => {
     size: 10
   });
 
+  const loadDailySummary = useCallback(async () => {
+    try {
+        setLoadingDaily(true);
+        const res = await movimentacaoService.getExtratoDiario();
+        setDailySummary(res || []);
+        try {
+            const PAGE_SIZE = 100;
+            // (Seu código para buscar contas)
+            const first = await api.get('/conta', { params: { page: 0, size: PAGE_SIZE } });
+            let all = first.data.content || [];
+            const totalPages = Number(first.data.totalPages ?? 1);
+            if (totalPages > 1) {
+                const promises = [];
+                for (let p = 1; p < totalPages; p++) promises.push(api.get('/conta', { params: { page: p, size: PAGE_SIZE } }));
+                const pages = await Promise.all(promises);
+                pages.forEach(r => { all = all.concat(r.data.content || []); });
+            }
+            const mapped = (all || []).map((c: any) => ({
+                id: String(c.idConta),
+                name: `${c.fkBanco?.nomeBanco ?? 'Banco'} • Ag ${c.agencia} Cc ${c.conta}-${c.dvConta}`,
+                balance: Number(c.saldo ?? 0)
+            }));
+            setFinanceAccounts(mapped);
+        } catch (err) {
+            console.error('Erro ao recarregar contas (/conta):', err);
+        }
+    } catch (err) {
+        console.error('Erro ao buscar extrato do dia', err);
+        setDailySummary([]);
+    } finally {
+        setLoadingDaily(false);
+    }
+}, [setLoadingDaily, setDailySummary, setFinanceAccounts]); 
+
   const [currentMovPage, setCurrentMovPage] = useState(0);
   const loadExtratoDiario = useCallback(async () => {
     try {
@@ -119,39 +153,7 @@ const handleGoToPage = (page: number) => {
 };
 
 
-  const loadDailySummary = useCallback(async () => {
-    try {
-        setLoadingDaily(true);
-        const res = await movimentacaoService.getExtratoDiario();
-        setDailySummary(res || []);
-        try {
-            const PAGE_SIZE = 100;
-            // (Seu código para buscar contas)
-            const first = await api.get('/conta', { params: { page: 0, size: PAGE_SIZE } });
-            let all = first.data.content || [];
-            const totalPages = Number(first.data.totalPages ?? 1);
-            if (totalPages > 1) {
-                const promises = [];
-                for (let p = 1; p < totalPages; p++) promises.push(api.get('/conta', { params: { page: p, size: PAGE_SIZE } }));
-                const pages = await Promise.all(promises);
-                pages.forEach(r => { all = all.concat(r.data.content || []); });
-            }
-            const mapped = (all || []).map((c: any) => ({
-                id: String(c.idConta),
-                name: `${c.fkBanco?.nomeBanco ?? 'Banco'} • Ag ${c.agencia} Cc ${c.conta}-${c.dvConta}`,
-                balance: Number(c.saldo ?? 0)
-            }));
-            setFinanceAccounts(mapped);
-        } catch (err) {
-            console.error('Erro ao recarregar contas (/conta):', err);
-        }
-    } catch (err) {
-        console.error('Erro ao buscar extrato do dia', err);
-        setDailySummary([]);
-    } finally {
-        setLoadingDaily(false);
-    }
-}, [setLoadingDaily, setDailySummary, setFinanceAccounts]); 
+  
                                        
   const formatForBackend = (localDatetime: string) => {
     if (!localDatetime) return '';
