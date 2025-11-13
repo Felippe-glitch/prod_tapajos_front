@@ -165,7 +165,7 @@ const handleGoToPage = (page: number) => {
     } catch {
       return String(input);
     }
-  }; [setLoadingDaily, setDailySummary, setFinanceAccounts]);
+  }; 
 
   const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
